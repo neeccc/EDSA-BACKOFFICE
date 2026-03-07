@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPERADMIN
+  TEACHER
+  STUDENT
+}
+
+enum PuzzleType {
+  MATCHING
+  ORDERING
+  FILL_BLANK
+  MULTIPLE_CHOICE
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role
+  avatar    String?
+  language  String   @default("en")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacherClasses ClassTeacher[]
+  studentClasses ClassStudent[]
+  progress       StudentProgress[]
+}
+
+model Class {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teachers ClassTeacher[]
+  students ClassStudent[]
+}
+
+model ClassTeacher {
+  userId  String
+  classId String
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  class   Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@id([userId, classId])
+}
+
+model ClassStudent {
+  userId  String
+  classId String
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  class   Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@id([userId, classId])
+}
+
+model Book {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  puzzleType  PuzzleType
+  coverImage  String?
+  order       Int        @unique
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  pages    Page[]
+  progress StudentProgress[]
+}
+
+model Page {
+  id         String   @id @default(cuid())
+  bookId     String
+  pageNumber Int
+  puzzleData Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  book     Book              @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  progress StudentProgress[]
+
+  @@unique([bookId, pageNumber])
+}
+
+model StudentProgress {
+  id        String   @id @default(cuid())
+  studentId String
+  bookId    String
+  pageId    String
+  completed Boolean  @default(false)
+  score     Int?
+  data      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  book    Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  page    Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, pageId])
+}
