@@ -39,6 +39,7 @@ interface StudentClass {
 interface Student {
   id: string;
   name: string;
+  username: string;
   email: string;
   avatar: string | null;
   createdAt: string;
@@ -48,6 +49,7 @@ interface Student {
 
 interface StudentForm {
   name: string;
+  username: string;
   email: string;
   password?: string;
 }
@@ -116,7 +118,7 @@ export default function StudentsPage() {
   const openEdit = (record: Student) => {
     setEditing(record);
     setAvatarUrl(record.avatar);
-    form.setFieldsValue({ name: record.name, email: record.email });
+    form.setFieldsValue({ name: record.name, username: record.username, email: record.email });
     setModalOpen(true);
   };
 
@@ -332,6 +334,7 @@ export default function StudentsPage() {
         </a>
       ),
     },
+    { title: t("username"), dataIndex: "username", key: "username" },
     { title: t("email"), dataIndex: "email", key: "email" },
     {
       title: t("class"),
@@ -469,6 +472,13 @@ export default function StudentsPage() {
           <Form.Item
             name="name"
             label={t("name")}
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="username"
+            label={t("username")}
             rules={[{ required: true }]}
           >
             <Input />

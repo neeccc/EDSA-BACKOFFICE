@@ -23,6 +23,7 @@ enum PuzzleType {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
+  username  String   @unique
   name      String
   password  String
   role      Role
@@ -68,6 +69,7 @@ model ClassStudent {
 model Book {
   id          String     @id @default(cuid())
   title       String
+  slug        String     @unique
   description String?
   puzzleType  PuzzleType
   coverImage  String?

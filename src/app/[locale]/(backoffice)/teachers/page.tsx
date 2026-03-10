@@ -34,6 +34,7 @@ const { Title, Text } = Typography;
 interface Teacher {
   id: string;
   name: string;
+  username: string;
   email: string;
   avatar: string | null;
   createdAt: string;
@@ -42,6 +43,7 @@ interface Teacher {
 
 interface TeacherForm {
   name: string;
+  username: string;
   email: string;
   password?: string;
 }
@@ -108,7 +110,7 @@ export default function TeachersPage() {
   const openEdit = (record: Teacher) => {
     setEditing(record);
     setAvatarUrl(record.avatar);
-    form.setFieldsValue({ name: record.name, email: record.email });
+    form.setFieldsValue({ name: record.name, username: record.username, email: record.email });
     setModalOpen(true);
   };
 
@@ -299,6 +301,7 @@ export default function TeachersPage() {
         ),
     },
     { title: t("name"), dataIndex: "name", key: "name" },
+    { title: t("username"), dataIndex: "username", key: "username" },
     { title: t("email"), dataIndex: "email", key: "email" },
     {
       title: t("classes"),
@@ -417,6 +420,13 @@ export default function TeachersPage() {
           <Form.Item
             name="name"
             label={t("name")}
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="username"
+            label={t("username")}
             rules={[{ required: true }]}
           >
             <Input />

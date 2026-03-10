@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { verifyAuth } from "@/lib/auth";
 import { isBookUnlocked } from "@/lib/book-unlock";
+import { addCors, OPTIONS as corsOptions } from "@/lib/cors";
+
+export const OPTIONS = corsOptions;
 
 /**
  * @swagger
@@ -36,7 +39,7 @@ export async function GET(
 ) {
   try {
     const auth = await verifyAuth(request);
-    if (!auth) return errorResponse("Unauthorized", 401);
+    if (!auth) return addCors(errorResponse("Unauthorized", 401));
 
     const { id } = await params;
 
@@ -45,6 +48,7 @@ export async function GET(
       select: {
         id: true,
         title: true,
+        slug: true,
         description: true,
         puzzleType: true,
         coverImage: true,
@@ -60,11 +64,11 @@ export async function GET(
       },
     });
 
-    if (!book) return errorResponse("Book not found", 404);
+    if (!book) return addCors(errorResponse("Book not found", 404));
 
     // Check unlock status
     const unlocked = await isBookUnlocked(book.order, auth.userId);
-    if (!unlocked) return errorResponse("Book is locked", 403);
+    if (!unlocked) return addCors(errorResponse("Book is locked", 403));
 
     // Fetch progress for all pages of this book in one query
     const progressRecords = await prisma.studentProgress.findMany({
@@ -93,16 +97,17 @@ export async function GET(
       };
     });
 
-    return successResponse({
+    return addCors(successResponse({
       id: book.id,
       title: book.title,
+      slug: book.slug,
       description: book.description,
       puzzleType: book.puzzleType,
       coverImage: book.coverImage,
       order: book.order,
       pages,
-    });
+    }));
   } catch {
-    return errorResponse("Internal server error", 500);
+    return addCors(errorResponse("Internal server error", 500));
   }
 }

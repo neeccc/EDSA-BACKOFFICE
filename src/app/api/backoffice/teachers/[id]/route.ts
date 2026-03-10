@@ -46,7 +46,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { name, email, password } = body;
+    const { name, username, email, password } = body;
 
     if (!name || !email) {
       return errorResponse("Name and email are required");
@@ -64,10 +64,23 @@ export async function PUT(
       return errorResponse("A user with this email already exists");
     }
 
-    const data: { name: string; email: string; password?: string } = {
+    if (username) {
+      const usernameConflict = await prisma.user.findFirst({
+        where: { username, id: { not: id } },
+      });
+      if (usernameConflict) {
+        return errorResponse("A user with this username already exists");
+      }
+    }
+
+    const data: { name: string; email: string; username?: string; password?: string } = {
       name,
       email,
     };
+
+    if (username) {
+      data.username = username;
+    }
 
     if (password) {
       data.password = await hash(password, 12);
@@ -79,6 +92,7 @@ export async function PUT(
       select: {
         id: true,
         name: true,
+        username: true,
         email: true,
         avatar: true,
         createdAt: true,

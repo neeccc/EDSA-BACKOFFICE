@@ -16,10 +16,11 @@
     "login": "Login",
     "logout": "Logout",
     "email": "Email",
+    "username": "Username",
     "password": "Password",
     "loginTitle": "Sign in to EDSA",
     "loginButton": "Sign in",
-    "loginError": "Invalid email or password"
+    "loginError": "Invalid username or password"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -47,6 +48,7 @@
   "teachers": {
     "title": "Teachers",
     "name": "Name",
+    "username": "Username",
     "email": "Email",
     "password": "Password",
     "passwordHint": "Leave blank to keep current",
@@ -72,6 +74,7 @@
   "students": {
     "title": "Students",
     "name": "Name",
+    "username": "Username",
     "email": "Email",
     "password": "Password",
     "passwordHint": "Leave blank to keep current",
@@ -126,6 +129,7 @@
   },
   "studentDetail": {
     "name": "Name",
+    "username": "Username",
     "email": "Email",
     "class": "Class",
     "noClass": "No class assigned",
@@ -144,7 +148,12 @@
     "status_in_progress": "In Progress",
     "status_completed": "Completed",
     "notFound": "Student not found",
-    "backToList": "Back to Students"
+    "backToList": "Back to Students",
+    "resetAllProgress": "Reset All Progress",
+    "resetProgress": "Reset",
+    "resetAllConfirm": "Are you sure you want to reset ALL progress for this student? This cannot be undone.",
+    "resetBookConfirm": "Are you sure you want to reset progress for this book? This cannot be undone.",
+    "progressReset": "Progress has been reset"
   },
   "books": {
     "title": "Books",

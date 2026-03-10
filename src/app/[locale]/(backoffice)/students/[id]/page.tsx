@@ -15,6 +15,8 @@ import {
   Spin,
   Empty,
   Button,
+  Popconfirm,
+  message,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -22,6 +24,7 @@ import {
   BookOutlined,
   CheckCircleOutlined,
   TrophyOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -40,6 +43,7 @@ const PUZZLE_TYPE_COLORS: Record<PuzzleType, string> = {
 interface StudentData {
   id: string;
   name: string;
+  username: string;
   email: string;
   avatar: string | null;
   createdAt: string;
@@ -79,6 +83,7 @@ export default function StudentDetailPage({
 }) {
   const { id, locale } = use(params);
   const t = useTranslations("studentDetail");
+  const tc = useTranslations("common");
   const router = useRouter();
 
   const [student, setStudent] = useState<StudentData | null>(null);
@@ -105,6 +110,22 @@ export default function StudentDetailPage({
       setLoading(false);
     }
   }, [id]);
+
+  const resetProgress = useCallback(async (bookId?: string) => {
+    try {
+      const url = bookId
+        ? `/api/backoffice/students/${id}/progress?bookId=${bookId}`
+        : `/api/backoffice/students/${id}/progress`;
+      const res = await fetch(url, { method: "DELETE" });
+      const json = await res.json();
+      if (json.success) {
+        message.success(t("progressReset"));
+        fetchStudent();
+      }
+    } catch {
+      message.error("Failed to reset progress");
+    }
+  }, [id, t, fetchStudent]);
 
   useEffect(() => {
     fetchStudent();
@@ -196,6 +217,24 @@ export default function StudentDetailPage({
           ? new Date(record.lastActivity).toLocaleDateString()
           : "—",
     },
+    {
+      title: "",
+      key: "actions",
+      width: 80,
+      render: (_: unknown, record: BookProgress) =>
+        record.status !== "not_started" ? (
+          <Popconfirm
+            title={t("resetBookConfirm")}
+            onConfirm={() => resetProgress(record.id)}
+            okText={t("resetProgress")}
+            cancelText={tc("cancel")}
+          >
+            <Button type="link" danger size="small" icon={<DeleteOutlined />}>
+              {t("resetProgress")}
+            </Button>
+          </Popconfirm>
+        ) : null,
+    },
   ];
 
   return (
@@ -222,6 +261,7 @@ export default function StudentDetailPage({
           <Col flex="auto">
             <Descriptions column={{ xs: 1, sm: 2, md: 2 }} colon={false} layout="vertical">
               <Descriptions.Item label={t("name")}>{student.name}</Descriptions.Item>
+              <Descriptions.Item label={t("username")}>{student.username}</Descriptions.Item>
               <Descriptions.Item label={t("email")}>{student.email}</Descriptions.Item>
               <Descriptions.Item label={t("class")}>
                 {cls ? <Tag color="blue">{cls.name}</Tag> : t("noClass")}
@@ -280,9 +320,23 @@ export default function StudentDetailPage({
         </Col>
       </Row>
 
-      <Title level={4} style={{ marginBottom: 16 }}>
-        {t("bookProgress")}
-      </Title>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <Title level={4} style={{ margin: 0 }}>
+          {t("bookProgress")}
+        </Title>
+        {bookProgress.some((b) => b.status !== "not_started") && (
+          <Popconfirm
+            title={t("resetAllConfirm")}
+            onConfirm={() => resetProgress()}
+            okText={t("resetAllProgress")}
+            cancelText={tc("cancel")}
+          >
+            <Button danger icon={<DeleteOutlined />}>
+              {t("resetAllProgress")}
+            </Button>
+          </Popconfirm>
+        )}
+      </div>
       <Card styles={{ body: { padding: 0 } }}>
         <Table
           dataSource={bookProgress}

@@ -16,10 +16,11 @@
     "login": "Masuk",
     "logout": "Keluar",
     "email": "Email",
+    "username": "Username",
     "password": "Kata Sandi",
     "loginTitle": "Masuk ke EDSA",
     "loginButton": "Masuk",
-    "loginError": "Email atau kata sandi salah"
+    "loginError": "Username atau kata sandi salah"
   },
   "nav": {
     "dashboard": "Dasbor",
@@ -47,6 +48,7 @@
   "teachers": {
     "title": "Guru",
     "name": "Nama",
+    "username": "Username",
     "email": "Email",
     "password": "Kata Sandi",
     "passwordHint": "Kosongkan untuk tetap menggunakan yang sekarang",
@@ -72,6 +74,7 @@
   "students": {
     "title": "Siswa",
     "name": "Nama",
+    "username": "Username",
     "email": "Email",
     "password": "Kata Sandi",
     "passwordHint": "Kosongkan untuk tetap menggunakan yang sekarang",
@@ -126,6 +129,7 @@
   },
   "studentDetail": {
     "name": "Nama",
+    "username": "Username",
     "email": "Email",
     "class": "Kelas",
     "noClass": "Belum ada kelas",
@@ -144,7 +148,12 @@
     "status_in_progress": "Sedang Berlangsung",
     "status_completed": "Selesai",
     "notFound": "Siswa tidak ditemukan",
-    "backToList": "Kembali ke Siswa"
+    "backToList": "Kembali ke Siswa",
+    "resetAllProgress": "Reset Semua Progres",
+    "resetProgress": "Reset",
+    "resetAllConfirm": "Apakah Anda yakin ingin mereset SEMUA progres siswa ini? Tindakan ini tidak dapat dibatalkan.",
+    "resetBookConfirm": "Apakah Anda yakin ingin mereset progres buku ini? Tindakan ini tidak dapat dibatalkan.",
+    "progressReset": "Progres telah direset"
   },
   "books": {
     "title": "Buku",

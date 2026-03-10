@@ -1,27 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { compare } from "bcryptjs";
 import { SignJWT } from "jose";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { addCors, OPTIONS as corsOptions } from "@/lib/cors";
 
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "*";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: corsHeaders });
-}
-
-function addCors(response: NextResponse) {
-  Object.entries(corsHeaders).forEach(([key, value]) => {
-    response.headers.set(key, value);
-  });
-  return response;
-}
+export const OPTIONS = corsOptions;
 
 /**
  * @swagger
@@ -36,9 +20,9 @@ function addCors(response: NextResponse) {
  *         application/json:
  *           schema:
  *             type: object
- *             required: [email, password]
+ *             required: [username, password]
  *             properties:
- *               email:
+ *               username:
  *                 type: string
  *               password:
  *                 type: string
@@ -50,13 +34,13 @@ function addCors(response: NextResponse) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const { username, password } = await request.json();
 
-    if (!email || !password) {
-      return addCors(errorResponse("Email and password are required", 400));
+    if (!username || !password) {
+      return addCors(errorResponse("Username and password are required", 400));
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { username } });
 
     if (!user || user.role !== "STUDENT") {
       return addCors(errorResponse("Invalid credentials", 401));
@@ -70,6 +54,7 @@ export async function POST(request: NextRequest) {
     const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
     const token = await new SignJWT({
       sub: user.id,
+      username: user.username,
       email: user.email,
       role: user.role,
     })
@@ -82,6 +67,7 @@ export async function POST(request: NextRequest) {
       token,
       user: {
         id: user.id,
+        username: user.username,
         email: user.email,
         name: user.name,
         language: user.language,

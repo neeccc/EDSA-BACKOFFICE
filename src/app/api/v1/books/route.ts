@@ -2,6 +2,9 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { verifyAuth } from "@/lib/auth";
+import { addCors, OPTIONS as corsOptions } from "@/lib/cors";
+
+export const OPTIONS = corsOptions;
 
 /**
  * @swagger
@@ -21,7 +24,7 @@ import { verifyAuth } from "@/lib/auth";
 export async function GET(request: NextRequest) {
   try {
     const auth = await verifyAuth(request);
-    if (!auth) return errorResponse("Unauthorized", 401);
+    if (!auth) return addCors(errorResponse("Unauthorized", 401));
 
     // Query 1: all books with page counts
     const books = await prisma.book.findMany({
@@ -29,6 +32,7 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         title: true,
+        slug: true,
         description: true,
         puzzleType: true,
         coverImage: true,
@@ -68,6 +72,7 @@ export async function GET(request: NextRequest) {
       return {
         id: book.id,
         title: book.title,
+        slug: book.slug,
         description: book.description,
         puzzleType: book.puzzleType,
         coverImage: book.coverImage,
@@ -78,8 +83,8 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    return successResponse(result);
+    return addCors(successResponse(result));
   } catch {
-    return errorResponse("Internal server error", 500);
+    return addCors(errorResponse("Internal server error", 500));
   }
 }

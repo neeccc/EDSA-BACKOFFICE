@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { verifyAuth } from "@/lib/auth";
 import { isBookUnlocked } from "@/lib/book-unlock";
+import { addCors, OPTIONS as corsOptions } from "@/lib/cors";
+
+export const OPTIONS = corsOptions;
 
 /**
  * @swagger
@@ -28,7 +31,7 @@ import { isBookUnlocked } from "@/lib/book-unlock";
 export async function GET(request: NextRequest) {
   try {
     const auth = await verifyAuth(request);
-    if (!auth) return errorResponse("Unauthorized", 401);
+    if (!auth) return addCors(errorResponse("Unauthorized", 401));
 
     const { searchParams } = new URL(request.url);
     const bookId = searchParams.get("bookId");
@@ -44,9 +47,9 @@ export async function GET(request: NextRequest) {
       orderBy: { updatedAt: "desc" },
     });
 
-    return successResponse(progress);
+    return addCors(successResponse(progress));
   } catch {
-    return errorResponse("Internal server error", 500);
+    return addCors(errorResponse("Internal server error", 500));
   }
 }
 
@@ -90,13 +93,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const auth = await verifyAuth(request);
-    if (!auth) return errorResponse("Unauthorized", 401);
+    if (!auth) return addCors(errorResponse("Unauthorized", 401));
 
     const body = await request.json();
     const { pageId, completed, score, data } = body;
 
     if (!pageId || typeof completed !== "boolean") {
-      return errorResponse("pageId and completed (boolean) are required");
+      return addCors(errorResponse("pageId and completed (boolean) are required"));
     }
 
     // Validate page exists and get its book
@@ -109,11 +112,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (!page) return errorResponse("Page not found", 404);
+    if (!page) return addCors(errorResponse("Page not found", 404));
 
     // Check if book is unlocked
     const unlocked = await isBookUnlocked(page.book.order, auth.userId);
-    if (!unlocked) return errorResponse("Book is locked", 403);
+    if (!unlocked) return addCors(errorResponse("Book is locked", 403));
 
     // Upsert progress
     const progress = await prisma.studentProgress.upsert({
@@ -138,8 +141,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return successResponse(progress);
+    return addCors(successResponse(progress));
   } catch {
-    return errorResponse("Internal server error", 500);
+    return addCors(errorResponse("Internal server error", 500));
   }
 }

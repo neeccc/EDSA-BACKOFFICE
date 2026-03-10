@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         name: true,
+        username: true,
         email: true,
         avatar: true,
         createdAt: true,
@@ -90,15 +91,25 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, password } = body;
+    const { name, email, password, username: rawUsername } = body;
 
     if (!name || !email || !password) {
       return errorResponse("Name, email, and password are required");
     }
 
+    const username: string =
+      typeof rawUsername === "string" && rawUsername.trim().length > 0
+        ? rawUsername.trim()
+        : email.split("@")[0];
+
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       return errorResponse("A user with this email already exists");
+    }
+
+    const existingUsername = await prisma.user.findUnique({ where: { username } });
+    if (existingUsername) {
+      return errorResponse("A user with this username already exists");
     }
 
     const hashedPassword = await hash(password, 12);
@@ -107,12 +118,14 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         email,
+        username,
         password: hashedPassword,
         role: "TEACHER",
       },
       select: {
         id: true,
         name: true,
+        username: true,
         email: true,
         avatar: true,
         createdAt: true,

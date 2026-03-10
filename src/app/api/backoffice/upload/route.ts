@@ -1,13 +1,11 @@
 import { NextRequest } from "next/server";
-import { writeFile, unlink } from "fs/promises";
-import { join, extname } from "path";
-import { existsSync } from "fs";
+import { extname } from "path";
+import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
-const UPLOAD_DIR = join(process.cwd(), "public/uploads/avatars");
 
 /**
  * @swagger
@@ -60,28 +58,26 @@ export async function POST(request: NextRequest) {
       return errorResponse("User not found", 404);
     }
 
-    // Remove old avatar if it exists with a different extension
-    if (user.avatar) {
-      const oldPath = join(process.cwd(), "public", user.avatar);
-      if (existsSync(oldPath)) {
-        await unlink(oldPath);
+    // Delete old blob if the avatar is a blob URL
+    if (user.avatar && user.avatar.startsWith("http")) {
+      try {
+        await del(user.avatar);
+      } catch {
+        // Old blob may already be gone — ignore
       }
     }
 
     const ext = extname(file.name) || `.${file.type.split("/")[1]}`;
-    const filename = `${userId}${ext}`;
-    const filepath = join(UPLOAD_DIR, filename);
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filepath, buffer);
-
-    const avatarPath = `/uploads/avatars/${filename}`;
-    await prisma.user.update({
-      where: { id: userId },
-      data: { avatar: avatarPath },
+    const blob = await put(`avatars/${userId}${ext}`, file, {
+      access: "public",
     });
 
-    return successResponse({ avatar: avatarPath });
+    await prisma.user.update({
+      where: { id: userId },
+      data: { avatar: blob.url },
+    });
+
+    return successResponse({ avatar: blob.url });
   } catch {
     return errorResponse("Internal server error", 500);
   }

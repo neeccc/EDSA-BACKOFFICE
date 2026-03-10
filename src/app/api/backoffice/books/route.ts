@@ -80,11 +80,20 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, description, puzzleType } = body;
+    const { title, description, puzzleType, slug: rawSlug } = body;
 
     if (!title || !puzzleType) {
       return errorResponse("Title and puzzle type are required");
     }
+
+    // Auto-generate slug from title if not provided
+    const slug: string =
+      typeof rawSlug === "string" && rawSlug.trim().length > 0
+        ? rawSlug.trim()
+        : (title as string)
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "");
 
     if (!PUZZLE_TYPES.includes(puzzleType)) {
       return errorResponse("Invalid puzzle type");
@@ -97,6 +106,7 @@ export async function POST(request: NextRequest) {
     const book = await prisma.book.create({
       data: {
         title,
+        slug,
         description: description || null,
         puzzleType,
         order: nextOrder,

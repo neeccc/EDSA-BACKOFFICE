@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Card, Form, Input, Typography, Alert, Flex, theme } from "antd";
-import { LockOutlined, MailOutlined } from "@ant-design/icons";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -19,12 +19,12 @@ export default function LoginPage() {
 
   const callbackUrl = searchParams.get("callbackUrl") || "/";
 
-  async function onFinish(values: { email: string; password: string }) {
+  async function onFinish(values: { username: string; password: string }) {
     setError(false);
     setLoading(true);
 
     const result = await signIn("credentials", {
-      email: values.email,
+      username: values.username,
       password: values.password,
       redirect: false,
     });
@@ -61,10 +61,10 @@ export default function LoginPage() {
 
         <Form onFinish={onFinish} layout="vertical" size="large">
           <Form.Item
-            name="email"
-            rules={[{ required: true, type: "email" }]}
+            name="username"
+            rules={[{ required: true }]}
           >
-            <Input prefix={<MailOutlined />} placeholder={t("email")} />
+            <Input prefix={<UserOutlined />} placeholder={t("username")} />
           </Form.Item>
 
           <Form.Item name="password" rules={[{ required: true }]}>
