@@ -118,37 +118,6 @@ export async function POST(request: NextRequest) {
     const unlocked = await isBookUnlocked(page.book.order, auth.userId);
     if (!unlocked) return addCors(errorResponse("Book is locked", 403));
 
-    // Check page-level sequential gating: previous pages must be completed first
-    const currentPageNumber = await prisma.page.findUnique({
-      where: { id: pageId },
-      select: { pageNumber: true },
-    });
-
-    if (currentPageNumber && currentPageNumber.pageNumber > 1) {
-      const previousPages = await prisma.page.findMany({
-        where: {
-          bookId: page.bookId,
-          pageNumber: { lt: currentPageNumber.pageNumber },
-        },
-        select: { id: true },
-      });
-
-      if (previousPages.length > 0) {
-        const completedPrevPages = await prisma.studentProgress.count({
-          where: {
-            studentId: auth.userId,
-            bookId: page.bookId,
-            pageId: { in: previousPages.map((p) => p.id) },
-            completed: true,
-          },
-        });
-
-        if (completedPrevPages < previousPages.length) {
-          return addCors(errorResponse("Previous pages must be completed first", 403));
-        }
-      }
-    }
-
     // Upsert progress
     const progress = await prisma.studentProgress.upsert({
       where: {
