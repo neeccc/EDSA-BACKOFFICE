@@ -13,26 +13,28 @@ export async function isBookUnlocked(
   const previousBook = await prisma.book.findFirst({
     where: { order: { lt: bookOrder } },
     orderBy: { order: "desc" },
-    select: {
-      id: true,
-      _count: { select: { pages: true } },
-    },
+    select: { id: true },
   });
 
   // No previous book means this is the first — always unlocked
   if (!previousBook) return true;
 
-  // If previous book has no pages, consider it complete
-  if (previousBook._count.pages === 0) return true;
+  // Count only story pages (pageNumber > 0), exclude cover page
+  const storyPageCount = await prisma.page.count({
+    where: { bookId: previousBook.id, pageNumber: { gt: 0 } },
+  });
 
-  // Count completed pages for the previous book
+  if (storyPageCount === 0) return true;
+
+  // Count completed story pages for the previous book
   const completedCount = await prisma.studentProgress.count({
     where: {
       studentId,
       bookId: previousBook.id,
       completed: true,
+      page: { pageNumber: { gt: 0 } },
     },
   });
 
-  return completedCount >= previousBook._count.pages;
+  return completedCount >= storyPageCount;
 }

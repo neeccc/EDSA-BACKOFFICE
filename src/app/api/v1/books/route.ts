@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const auth = await verifyAuth(request);
     if (!auth) return addCors(errorResponse("Unauthorized", 401));
 
-    // Query 1: all books with page counts
+    // Query 1: all books with total page counts and story page counts (pageNumber > 0)
     const books = await prisma.book.findMany({
       orderBy: { order: "asc" },
       select: {
@@ -41,10 +41,24 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Query 2: completed page counts grouped by book for this student
+    // Count story pages (pageNumber > 0) per book for unlock checks
+    const storyPageCounts = await prisma.page.groupBy({
+      by: ["bookId"],
+      where: { pageNumber: { gt: 0 } },
+      _count: { id: true },
+    });
+    const storyPageMap = new Map(
+      storyPageCounts.map((p) => [p.bookId, p._count.id])
+    );
+
+    // Query 2: completed story page counts (pageNumber > 0) grouped by book
     const progressByBook = await prisma.studentProgress.groupBy({
       by: ["bookId"],
-      where: { studentId: auth.userId, completed: true },
+      where: {
+        studentId: auth.userId,
+        completed: true,
+        page: { pageNumber: { gt: 0 } },
+      },
       _count: { id: true },
     });
 
@@ -54,7 +68,7 @@ export async function GET(request: NextRequest) {
 
     // Walk sequentially to compute unlock status
     const result = books.map((book, index) => {
-      const pageCount = book._count.pages;
+      const pageCount = storyPageMap.get(book.id) || 0;
       const completedPages = completedMap.get(book.id) || 0;
 
       let unlocked: boolean;
@@ -62,9 +76,9 @@ export async function GET(request: NextRequest) {
         // First book is always unlocked
         unlocked = true;
       } else {
-        // Check if previous book is fully completed
+        // Check if previous book's story pages are fully completed
         const prev = books[index - 1];
-        const prevPageCount = prev._count.pages;
+        const prevPageCount = storyPageMap.get(prev.id) || 0;
         const prevCompleted = completedMap.get(prev.id) || 0;
         unlocked = prevPageCount === 0 || prevCompleted >= prevPageCount;
       }
