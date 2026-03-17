@@ -2,13 +2,24 @@ import { prisma } from "@/lib/prisma";
 
 /**
  * Check if a book is unlocked for a student.
- * The first book (lowest order) is always unlocked.
- * Subsequent books require all pages of the previous book to be completed.
+ * A book is unlocked if:
+ * 1. It's the first book (lowest order) — always unlocked
+ * 2. All story pages of the previous book are completed (auto unlock)
+ * 3. A manual BookUnlock record exists for this student+book
  */
 export async function isBookUnlocked(
   bookOrder: number,
-  studentId: string
+  studentId: string,
+  bookId?: string
 ): Promise<boolean> {
+  // Check manual unlock first (if bookId is provided)
+  if (bookId) {
+    const manualUnlock = await prisma.bookUnlock.findUnique({
+      where: { studentId_bookId: { studentId, bookId } },
+    });
+    if (manualUnlock) return true;
+  }
+
   // Find the previous book (highest order less than this one)
   const previousBook = await prisma.book.findFirst({
     where: { order: { lt: bookOrder } },

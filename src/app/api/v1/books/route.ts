@@ -66,13 +66,23 @@ export async function GET(request: NextRequest) {
       progressByBook.map((p) => [p.bookId, p._count.id])
     );
 
+    // Query 3: manual unlocks for this student
+    const manualUnlocks = await prisma.bookUnlock.findMany({
+      where: { studentId: auth.userId },
+      select: { bookId: true },
+    });
+    const manualUnlockSet = new Set(manualUnlocks.map((u) => u.bookId));
+
     // Walk sequentially to compute unlock status
     const result = books.map((book, index) => {
       const pageCount = storyPageMap.get(book.id) || 0;
       const completedPages = completedMap.get(book.id) || 0;
 
       let unlocked: boolean;
-      if (index === 0) {
+      if (manualUnlockSet.has(book.id)) {
+        // Manually unlocked by teacher/admin
+        unlocked = true;
+      } else if (index === 0) {
         // First book is always unlocked
         unlocked = true;
       } else {

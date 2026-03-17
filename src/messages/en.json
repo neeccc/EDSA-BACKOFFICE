@@ -153,7 +153,19 @@
     "resetProgress": "Reset",
     "resetAllConfirm": "Are you sure you want to reset ALL progress for this student? This cannot be undone.",
     "resetBookConfirm": "Are you sure you want to reset progress for this book? This cannot be undone.",
-    "progressReset": "Progress has been reset"
+    "progressReset": "Progress has been reset",
+    "unlock": "Unlock",
+    "unlockBook": "Unlock",
+    "lock": "Lock",
+    "unlockAll": "Unlock All",
+    "removeAllUnlocks": "Remove All Unlocks",
+    "unlockAllConfirm": "Unlock all books for this student?",
+    "removeAllUnlocksConfirm": "Remove all manual unlocks? Books will revert to auto-unlock rules.",
+    "lockBookConfirm": "Remove manual unlock for this book? It will revert to auto-unlock rules.",
+    "bookUnlocked": "Book unlocked",
+    "bookLocked": "Manual unlock removed",
+    "allBooksUnlocked": "All books unlocked",
+    "allUnlocksRemoved": "All manual unlocks removed"
   },
   "books": {
     "title": "Books",

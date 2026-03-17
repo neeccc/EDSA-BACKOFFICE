@@ -67,7 +67,7 @@ export async function GET(
     if (!book) return addCors(errorResponse("Book not found", 404));
 
     // Check unlock status
-    const unlocked = await isBookUnlocked(book.order, auth.userId);
+    const unlocked = await isBookUnlocked(book.order, auth.userId, book.id);
     if (!unlocked) return addCors(errorResponse("Book is locked", 403));
 
     // Fetch progress for all pages of this book in one query

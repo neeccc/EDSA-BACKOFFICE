@@ -153,7 +153,19 @@
     "resetProgress": "Reset",
     "resetAllConfirm": "Apakah Anda yakin ingin mereset SEMUA progres siswa ini? Tindakan ini tidak dapat dibatalkan.",
     "resetBookConfirm": "Apakah Anda yakin ingin mereset progres buku ini? Tindakan ini tidak dapat dibatalkan.",
-    "progressReset": "Progres telah direset"
+    "progressReset": "Progres telah direset",
+    "unlock": "Unlock",
+    "unlockBook": "Unlock",
+    "lock": "Kunci",
+    "unlockAll": "Unlock Semua",
+    "removeAllUnlocks": "Hapus Semua Unlock",
+    "unlockAllConfirm": "Unlock semua buku untuk siswa ini?",
+    "removeAllUnlocksConfirm": "Hapus semua unlock manual? Buku akan kembali ke aturan otomatis.",
+    "lockBookConfirm": "Hapus unlock manual untuk buku ini? Akan kembali ke aturan otomatis.",
+    "bookUnlocked": "Buku telah di-unlock",
+    "bookLocked": "Unlock manual dihapus",
+    "allBooksUnlocked": "Semua buku telah di-unlock",
+    "allUnlocksRemoved": "Semua unlock manual dihapus"
   },
   "books": {
     "title": "Buku",

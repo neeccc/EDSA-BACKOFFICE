@@ -53,6 +53,13 @@ export async function GET(
       },
     });
 
+    // Get manual unlocks for this student
+    const manualUnlocks = await prisma.bookUnlock.findMany({
+      where: { studentId: id },
+      select: { bookId: true },
+    });
+    const manualUnlockSet = new Set(manualUnlocks.map((u) => u.bookId));
+
     const books = await prisma.book.findMany({
       orderBy: { order: "asc" },
       select: {
@@ -102,6 +109,7 @@ export async function GET(
         avgScore,
         lastActivity,
         status,
+        manuallyUnlocked: manualUnlockSet.has(book.id),
       };
     });
 

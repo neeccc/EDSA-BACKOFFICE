@@ -17,6 +17,7 @@ import {
   Button,
   Popconfirm,
   message,
+  Space,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -25,6 +26,8 @@ import {
   CheckCircleOutlined,
   TrophyOutlined,
   DeleteOutlined,
+  UnlockOutlined,
+  LockOutlined,
 } from "@ant-design/icons";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -60,6 +63,7 @@ interface BookProgress {
   avgScore: number | null;
   lastActivity: string | null;
   status: "not_started" | "in_progress" | "completed";
+  manuallyUnlocked: boolean;
 }
 
 interface Stats {
@@ -127,6 +131,70 @@ export default function StudentDetailPage({
     }
   }, [id, t, fetchStudent]);
 
+  const unlockBook = useCallback(async (bookId: string) => {
+    try {
+      const res = await fetch(`/api/backoffice/students/${id}/unlocks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookIds: [bookId] }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        message.success(t("bookUnlocked"));
+        fetchStudent();
+      }
+    } catch {
+      message.error("Failed to unlock book");
+    }
+  }, [id, t, fetchStudent]);
+
+  const lockBook = useCallback(async (bookId: string) => {
+    try {
+      const res = await fetch(`/api/backoffice/students/${id}/unlocks?bookId=${bookId}`, {
+        method: "DELETE",
+      });
+      const json = await res.json();
+      if (json.success) {
+        message.success(t("bookLocked"));
+        fetchStudent();
+      }
+    } catch {
+      message.error("Failed to lock book");
+    }
+  }, [id, t, fetchStudent]);
+
+  const unlockAll = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/backoffice/students/${id}/unlocks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ all: true }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        message.success(t("allBooksUnlocked"));
+        fetchStudent();
+      }
+    } catch {
+      message.error("Failed to unlock all books");
+    }
+  }, [id, t, fetchStudent]);
+
+  const removeAllUnlocks = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/backoffice/students/${id}/unlocks`, {
+        method: "DELETE",
+      });
+      const json = await res.json();
+      if (json.success) {
+        message.success(t("allUnlocksRemoved"));
+        fetchStudent();
+      }
+    } catch {
+      message.error("Failed to remove unlocks");
+    }
+  }, [id, t, fetchStudent]);
+
   useEffect(() => {
     fetchStudent();
   }, [fetchStudent]);
@@ -155,6 +223,7 @@ export default function StudentDetailPage({
   }
 
   const cls = student.studentClasses?.[0]?.class;
+  const hasManualUnlocks = bookProgress.some((b) => b.manuallyUnlocked);
 
   const columns = [
     {
@@ -216,6 +285,41 @@ export default function StudentDetailPage({
         record.lastActivity
           ? new Date(record.lastActivity).toLocaleDateString()
           : "—",
+    },
+    {
+      title: t("unlock"),
+      key: "unlock",
+      width: 120,
+      render: (_: unknown, record: BookProgress) => {
+        if (record.manuallyUnlocked) {
+          return (
+            <Popconfirm
+              title={t("lockBookConfirm")}
+              onConfirm={() => lockBook(record.id)}
+              okText={tc("confirm")}
+              cancelText={tc("cancel")}
+            >
+              <Button
+                type="link"
+                size="small"
+                icon={<LockOutlined />}
+              >
+                {t("lock")}
+              </Button>
+            </Popconfirm>
+          );
+        }
+        return (
+          <Button
+            type="link"
+            size="small"
+            icon={<UnlockOutlined />}
+            onClick={() => unlockBook(record.id)}
+          >
+            {t("unlockBook")}
+          </Button>
+        );
+      },
     },
     {
       title: "",
@@ -324,18 +428,42 @@ export default function StudentDetailPage({
         <Title level={4} style={{ margin: 0 }}>
           {t("bookProgress")}
         </Title>
-        {bookProgress.some((b) => b.status !== "not_started") && (
+        <Space>
+          {hasManualUnlocks ? (
+            <Popconfirm
+              title={t("removeAllUnlocksConfirm")}
+              onConfirm={removeAllUnlocks}
+              okText={tc("confirm")}
+              cancelText={tc("cancel")}
+            >
+              <Button icon={<LockOutlined />}>
+                {t("removeAllUnlocks")}
+              </Button>
+            </Popconfirm>
+          ) : null}
           <Popconfirm
-            title={t("resetAllConfirm")}
-            onConfirm={() => resetProgress()}
-            okText={t("resetAllProgress")}
+            title={t("unlockAllConfirm")}
+            onConfirm={unlockAll}
+            okText={tc("confirm")}
             cancelText={tc("cancel")}
           >
-            <Button danger icon={<DeleteOutlined />}>
-              {t("resetAllProgress")}
+            <Button type="primary" icon={<UnlockOutlined />}>
+              {t("unlockAll")}
             </Button>
           </Popconfirm>
-        )}
+          {bookProgress.some((b) => b.status !== "not_started") && (
+            <Popconfirm
+              title={t("resetAllConfirm")}
+              onConfirm={() => resetProgress()}
+              okText={t("resetAllProgress")}
+              cancelText={tc("cancel")}
+            >
+              <Button danger icon={<DeleteOutlined />}>
+                {t("resetAllProgress")}
+              </Button>
+            </Popconfirm>
+          )}
+        </Space>
       </div>
       <Card styles={{ body: { padding: 0 } }}>
         <Table

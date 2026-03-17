@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     if (!page) return addCors(errorResponse("Page not found", 404));
 
     // Check if book is unlocked
-    const unlocked = await isBookUnlocked(page.book.order, auth.userId);
+    const unlocked = await isBookUnlocked(page.book.order, auth.userId, page.bookId);
     if (!unlocked) return addCors(errorResponse("Book is locked", 403));
 
     // Upsert progress
