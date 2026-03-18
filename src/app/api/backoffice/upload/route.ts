@@ -3,6 +3,7 @@ import { extname } from "path";
 import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { requireSession } from "@/lib/require-session";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
@@ -37,6 +38,9 @@ const MAX_SIZE = 2 * 1024 * 1024; // 2MB
  */
 export async function POST(request: NextRequest) {
   try {
+    const { error } = await requireSession();
+    if (error) return error;
+
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const userId = formData.get("userId") as string | null;

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { requireSession } from "@/lib/require-session";
 
 /**
  * @swagger
@@ -33,6 +34,8 @@ import { successResponse, errorResponse } from "@/lib/api-response";
  */
 export async function GET(request: NextRequest) {
   try {
+    const { error } = await requireSession();
+    if (error) return error;
     const search = request.nextUrl.searchParams.get("search") || "";
     const excludeClassId = request.nextUrl.searchParams.get("excludeClassId");
     const unassigned = request.nextUrl.searchParams.get("unassigned");
@@ -105,6 +108,8 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const { error } = await requireSession();
+    if (error) return error;
     const body = await request.json();
     const { name, email, password, username: rawUsername } = body;
 

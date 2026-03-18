@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { requireSession } from "@/lib/require-session";
 
 const PUZZLE_TYPES = ["MATCHING", "ORDERING", "FILL_BLANK", "MULTIPLE_CHOICE"];
 
@@ -23,6 +24,9 @@ const PUZZLE_TYPES = ["MATCHING", "ORDERING", "FILL_BLANK", "MULTIPLE_CHOICE"];
  */
 export async function GET(request: NextRequest) {
   try {
+    const { error } = await requireSession();
+    if (error) return error;
+
     const search = request.nextUrl.searchParams.get("search") || "";
 
     const books = await prisma.book.findMany({
@@ -79,6 +83,9 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const { error } = await requireSession();
+    if (error) return error;
+
     const body = await request.json();
     const { title, description, puzzleType, slug: rawSlug } = body;
 

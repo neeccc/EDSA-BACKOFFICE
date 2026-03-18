@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { requireSession } from "@/lib/require-session";
 
 /**
  * @swagger
@@ -14,6 +15,8 @@ import { successResponse, errorResponse } from "@/lib/api-response";
  */
 export async function GET() {
   try {
+    const { error } = await requireSession();
+    if (error) return error;
     const [teachers, students, classes, books, progressAgg] =
       await Promise.all([
         prisma.user.count({ where: { role: "TEACHER" } }),

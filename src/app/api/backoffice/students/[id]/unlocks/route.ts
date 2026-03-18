@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { requireSession } from "@/lib/require-session";
 
 /**
  * GET /api/backoffice/students/[id]/unlocks
@@ -11,6 +12,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { error } = await requireSession();
+    if (error) return error;
+
     const { id } = await params;
 
     const unlocks = await prisma.bookUnlock.findMany({
@@ -35,6 +39,9 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { error } = await requireSession();
+    if (error) return error;
+
     const { id } = await params;
     const body = await request.json();
 
@@ -85,6 +92,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { error } = await requireSession();
+    if (error) return error;
+
     const { id } = await params;
     const bookId = request.nextUrl.searchParams.get("bookId");
 

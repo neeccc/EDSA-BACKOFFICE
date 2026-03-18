@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { requireSession } from "@/lib/require-session";
 
 /**
  * @swagger
@@ -27,6 +28,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { error } = await requireSession();
+    if (error) return error;
+
     const { id } = await params;
 
     const cls = await prisma.class.findUnique({
@@ -93,6 +97,9 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { error } = await requireSession();
+    if (error) return error;
+
     const { id } = await params;
     const { action, role, userId } = await request.json();
 

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
+const allowedOrigin = process.env.ALLOWED_ORIGIN || "*";
+
 export const corsHeaders: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": allowedOrigin,
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
