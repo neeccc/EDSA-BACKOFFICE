@@ -41,23 +41,23 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Count story pages (pageNumber > 0) per book for unlock checks
+    // Count story pages (pageNumber > 0, exclude assessment 9999) per book for unlock checks
     const storyPageCounts = await prisma.page.groupBy({
       by: ["bookId"],
-      where: { pageNumber: { gt: 0 } },
+      where: { pageNumber: { gt: 0, lt: 9999 } },
       _count: { id: true },
     });
     const storyPageMap = new Map(
       storyPageCounts.map((p) => [p.bookId, p._count.id])
     );
 
-    // Query 2: completed story page counts (pageNumber > 0) grouped by book
+    // Query 2: completed story page counts (exclude cover 0 and assessment 9999) grouped by book
     const progressByBook = await prisma.studentProgress.groupBy({
       by: ["bookId"],
       where: {
         studentId: auth.userId,
         completed: true,
-        page: { pageNumber: { gt: 0 } },
+        page: { pageNumber: { gt: 0, lt: 9999 } },
       },
       _count: { id: true },
     });

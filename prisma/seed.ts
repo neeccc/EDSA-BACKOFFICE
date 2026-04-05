@@ -13,52 +13,52 @@ const BOOKS = [
   },
   {
     slug: "timun-mas-count-to-ten",
-    title: "Timun Mas Count to Ten",
+    title: "Timun Mas Counts to Ten",
     puzzleType: PuzzleType.ORDERING,
     order: 2,
-    storyPages: 12, // pages 1-12
+    storyPages: 13, // pages 0-12
   },
   {
     slug: "bawang-putih-and-the-scarf",
     title: "Bawang Putih and the Scarf",
     puzzleType: PuzzleType.MATCHING,
     order: 3,
-    storyPages: 12,
+    storyPages: 13, // pages 0-12
   },
   {
-    slug: "lutung-kasarung",
-    title: "Lutung Kasarung",
+    slug: "lutung-kasarung-learn-about-family",
+    title: "Lutung Kasarung Learns About Family",
     puzzleType: PuzzleType.FILL_BLANK,
     order: 4,
-    storyPages: 9,
+    storyPages: 8, // pages 0-7
   },
   {
     slug: "malin-kundang-finding-a-job",
     title: "Malin Kundang Finding a Job",
     puzzleType: PuzzleType.MULTIPLE_CHOICE,
     order: 5,
-    storyPages: 0,
+    storyPages: 9, // pages 0-8
   },
   {
     slug: "the-golden-snail",
     title: "The Golden Snail",
     puzzleType: PuzzleType.MATCHING,
     order: 6,
-    storyPages: 0,
+    storyPages: 10, // pages 0-9
   },
   {
     slug: "the-clever-mouse-deer",
     title: "The Clever Mouse Deer",
     puzzleType: PuzzleType.MATCHING,
     order: 7,
-    storyPages: 0,
+    storyPages: 18, // pages 0-17
   },
   {
     slug: "the-snail-and-the-rabbit",
     title: "The Snail and the Rabbit",
     puzzleType: PuzzleType.MATCHING,
     order: 8,
-    storyPages: 0,
+    storyPages: 9, // pages 0-8
   },
 ];
 

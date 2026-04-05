@@ -30,9 +30,9 @@ export async function isBookUnlocked(
   // No previous book means this is the first — always unlocked
   if (!previousBook) return true;
 
-  // Count only story pages (pageNumber > 0), exclude cover page
+  // Count only story pages (pageNumber > 0), exclude cover (0) and assessment (9999)
   const storyPageCount = await prisma.page.count({
-    where: { bookId: previousBook.id, pageNumber: { gt: 0 } },
+    where: { bookId: previousBook.id, pageNumber: { gt: 0, lt: 9999 } },
   });
 
   if (storyPageCount === 0) return true;
@@ -43,7 +43,7 @@ export async function isBookUnlocked(
       studentId,
       bookId: previousBook.id,
       completed: true,
-      page: { pageNumber: { gt: 0 } },
+      page: { pageNumber: { gt: 0, lt: 9999 } },
     },
   });
 
