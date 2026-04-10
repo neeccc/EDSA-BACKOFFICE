@@ -71,16 +71,22 @@ export async function GET(
         title: true,
         puzzleType: true,
         order: true,
-        _count: { select: { pages: true } },
+        pages: {
+          where: { pageNumber: { gt: 0, lt: 9999 } },
+          select: { id: true },
+        },
         progress: {
-          where: { studentId: id },
+          where: {
+            studentId: id,
+            page: { pageNumber: { gt: 0, lt: 9999 } },
+          },
           select: { completed: true, score: true, updatedAt: true },
         },
       },
     });
 
     const bookProgress = books.map((book) => {
-      const totalPages = book._count.pages;
+      const totalPages = book.pages.length;
       const completedPages = book.progress.filter((p) => p.completed).length;
       const scores = book.progress
         .map((p) => p.score)

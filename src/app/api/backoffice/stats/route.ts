@@ -17,6 +17,9 @@ export async function GET() {
   try {
     const { error } = await requireSession();
     if (error) return error;
+    // Only count story pages (exclude cover page 0 and assessment 9999)
+    const storyPageFilter = { page: { pageNumber: { gt: 0, lt: 9999 } } };
+
     const [teachers, students, classes, books, progressAgg] =
       await Promise.all([
         prisma.user.count({ where: { role: "TEACHER" } }),
@@ -24,13 +27,14 @@ export async function GET() {
         prisma.class.count(),
         prisma.book.count(),
         prisma.studentProgress.aggregate({
+          where: storyPageFilter,
           _count: { id: true },
           _avg: { score: true },
         }),
       ]);
 
     const completedCount = await prisma.studentProgress.count({
-      where: { completed: true },
+      where: { completed: true, ...storyPageFilter },
     });
 
     const totalProgress = progressAgg._count.id;
