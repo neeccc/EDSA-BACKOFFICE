@@ -13,7 +13,7 @@ import {
   Tag,
   App,
 } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useTranslations } from "next-intl";
 
 const { Title } = Typography;
@@ -80,12 +80,6 @@ export default function BooksPage() {
   const handleSearch = (value: string) => {
     setSearch(value);
     fetchBooks(value);
-  };
-
-  const openCreate = () => {
-    setEditing(null);
-    form.resetFields();
-    setModalOpen(true);
   };
 
   const openEdit = (record: Book) => {
@@ -212,9 +206,6 @@ export default function BooksPage() {
         <Title level={2} style={{ margin: 0 }}>
           {t("title")}
         </Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-          {t("createBook")}
-        </Button>
       </div>
 
       <Input.Search
